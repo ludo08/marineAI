@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blue Bay Marine Park</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="logo">Blue Bay Marine Park</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="AIGuide.html">AI Guide</a></li>
+      <li><a href="#">Coral Monitor</a></li>
+    </ul>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-toggle" id="menu-toggle">☰</div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-overlay">
+      <div class="hero-content">
+        <div class="container">
+    <h1>Teachable Machine Image Model</h1>
+
+    <!-- Upload button -->
+    <input type="file" id="imageUpload" accept="image/*" />
+
+    <!-- Preview and results -->
+    <div id="preview-container">
+        <img id="preview" src="" alt="Uploaded Image" style="display:none;">
+    </div>
+    <div id="label-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+  <script>
+    const URL = "./my_model/";
+    let model, labelContainer, maxPredictions;
+
+    // Load the model on page load
+    window.addEventListener("load", async () => {
+      const modelURL = URL + "model.json";
+      const metadataURL = URL + "metadata.json";
+
+      model = await tmImage.load(modelURL, metadataURL);
+      maxPredictions = model.getTotalClasses();
+
+      labelContainer = document.getElementById("label-container");
+      for (let i = 0; i < maxPredictions; i++) {
+        labelContainer.appendChild(document.createElement("div"));
+      }
+    });
+
+    // Handle file selection
+    document.getElementById("imageUpload").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const img = document.getElementById("preview");
+      img.style.display = "block";
+
+      // Read the file as a Data URL
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        img.src = e.target.result;
+
+        img.onload = async () => {
+          const prediction = await model.predict(img);
+          prediction.forEach((p, i) => {
+            labelContainer.childNodes[i].textContent =
+              `${p.className}: ${p.probability.toFixed(2)}`;
+          });
+        };
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Toggle menu for mobile
+    const menuToggle = document.getElementById("menu-toggle");
+    const navLinks = document.querySelector(".nav-links");
+
+    menuToggle.addEventListener("click", () => {
+      navLinks.classList.toggle("active");
+    });
+  </script>
+
+</body>
+</html>
