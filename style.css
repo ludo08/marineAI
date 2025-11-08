@@ -155,3 +155,43 @@ body {
     gap: 15px;
   }
 }
+
+
+    #imageUpload {
+      display: block;
+      margin: 1rem auto;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 2px solid #007bff;
+      border-radius: 6px;
+      background: #fff;
+      color: #007bff;
+      cursor: pointer;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    #preview-container {
+      margin-top: 1rem;
+    }
+
+    #preview {
+      max-width: 90vw;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    #label-container {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+
+    /* Make text easier to tap/scroll */
+    @media (hover: none) {
+      #imageUpload {
+        font-size: 1.1rem;
+        padding: 1rem;
+      }
+    }
