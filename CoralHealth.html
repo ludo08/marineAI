@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blue Bay Marine Park</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="logo">Blue Bay Marine Park</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="AIGuide.html">AI Guide</a></li>
+      <li><a href="#">Coral Monitor</a></li>
+    </ul>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-toggle" id="menu-toggle">☰</div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-overlay">
+      <div class="hero-content">
+        <div class="container">
+    <h1>Teachable Machine Image Model</h1>
+
+    <!-- Upload button -->
+    <input type="file" id="imageUpload" accept="image/*" />
+
+    <!-- Preview and results -->
+    <div id="preview-container">
+        <img id="preview" src="" alt="Uploaded Image" style="display:none;">
+    </div>
+    <div id="label-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+  <script>
+    const URL = "./my_model/";
+
+  let model, labelContainer, maxPredictions;
+
+  // Load the Teachable Machine model
+  window.addEventListener("load", async () => {
+    const modelURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
+
+    try {
+      model = await tmImage.load(modelURL, metadataURL);
+      maxPredictions = model.getTotalClasses();
+
+      labelContainer = document.getElementById("label-container");
+      labelContainer.innerHTML = ""; // Clear any previous results
+
+      for (let i = 0; i < maxPredictions; i++) {
+        labelContainer.appendChild(document.createElement("div"));
+      }
+
+      console.log("✅ Model loaded successfully");
+    } catch (err) {
+      console.error("❌ Failed to load model:", err);
+      document.getElementById("label-container").textContent =
+        "⚠️ Error loading model. Check the model URL or hosting path.";
+    }
+  });
+
+  // Handle file uploads
+  document.getElementById("imageUpload").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!model) {
+      alert("Model not loaded yet! Please wait a few seconds and try again.");
+      return;
+    }
+
+    const img = document.getElementById("preview");
+    img.style.display = "block";
+
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+      img.src = e.target.result;
+
+      img.onload = async () => {
+        // --- 🖼️ Resize the image for prediction ---
+        const MAX_WIDTH = 400;
+        const MAX_HEIGHT = 400;
+
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        // Draw resized image onto a temporary canvas
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // --- 🔍 Run prediction ---
+        try {
+          const prediction = await model.predict(canvas);
+          prediction.forEach((p, i) => {
+            labelContainer.childNodes[i].textContent =
+              `${p.className}: ${p.probability.toFixed(2)}`;
+          });
+        } catch (err) {
+          console.error("Prediction error:", err);
+          labelContainer.textContent = "⚠️ Error during prediction.";
+        }
+      };
+    };
+
+    reader.readAsDataURL(file);
+  });
+  </script>
+      </div>
+    </div>
+  </section>
+
+
+</body>
+</html>
